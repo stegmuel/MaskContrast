@@ -8,7 +8,7 @@ import os
 import sys
 import torch
 
-from utils.config import create_config
+from utils.config import update_config
 from utils.common_config import get_train_dataset, get_train_transformations,\
                                 get_val_dataset, get_val_transformations,\
                                 get_train_dataloader, get_val_dataloader,\
@@ -18,23 +18,47 @@ from utils.evaluate_utils import eval_segmentation_supervised_online, save_resul
                                  eval_segmentation_supervised_offline
 from termcolor import colored
 from utils.logger import Logger
+from segmentation.utils.dino_utils import bool_flag
 
 
-# Parser
-parser = argparse.ArgumentParser(description='Fully-supervised segmentation - Finetune linear layer')
-parser.add_argument('--config_env',
-                    help='Config file for the environment')
-parser.add_argument('--config_exp',
-                    help='Config file for the experiment')
-parser.add_argument('--crf-postprocess', action='store_true',
-                    help='Apply CRF post-processing during evaluation')
-args = parser.parse_args()
+def get_args_parser():
+    parser = argparse.ArgumentParser('LC', add_help=False)
+    parser.add_argument("--root_dir",
+                        default='/home/thomas/Documents/phd/samno_paper/Unsupervised-Semantic-Segmentation/output/LC',
+                        type=str)
+    parser.add_argument("--train_db_name", default="VOCSegmentation", type=str)
+    parser.add_argument("--data_path", default='/media/thomas/Samsung_T5/VOC12/VOCdevkit/VOC2012/', type=str)
+    parser.add_argument("--split", default='trainaug', type=str)
+    parser.add_argument("--batch_size", default=16, type=int)
+    parser.add_argument("--val_db_name", default="VOCSegmentation")
+    parser.add_argument("--num_workers", default=4, type=int)
+    parser.add_argument("--backbone", default='vit', type=str)
+    parser.add_argument("--dilated", default=False, type=bool_flag)
+    parser.add_argument("--head", default='linear', type=str)
+    parser.add_argument("--arch", default='vit_small', type=str)
+    parser.add_argument("--patch_size", default=16, type=int)
+    parser.add_argument("--checkpoint_key", default='teacher', type=str)
+    parser.add_argument("--pretraining",
+                        default='/home/thomas/Documents/phd/samno_paper/samno/output/dino_deitsmall16_pretrain_full_checkpoint.pth', type=str)
+    parser.add_argument("--epochs", default=60, type=int)
+    parser.add_argument("--scheduler", default='step', type=str)
+    parser.add_argument("--lr_decay_rate", default=0.1, type=float)
+    parser.add_argument("--lr_decay_epochs", default=25, type=int)
+    parser.add_argument("--optimizer", default='sgd', type=str)
+    parser.add_argument("--lr", default=0.1, type=float)
+    parser.add_argument("--weight_decay", default=0.0001, type=float)
+    parser.add_argument("--momentum", default=0.9, type=float)
+    parser.add_argument("--nesterov", default=False, type=bool_flag)
+    parser.add_argument("--freeze_batchnorm", default='all', type=str)
+    parser.add_argument('--crf-postprocess', action='store_true', help='Apply CRF post-processing during evaluation')
+    return parser
 
 
-def main():
+def main(args):
+    p = vars(args)
     cv2.setNumThreads(1)
     # Retrieve config file
-    p = create_config(args.config_env, args.config_exp)
+    p = update_config(p)
     sys.stdout = Logger(p['log_file'])
     print('Python script is {}'.format(os.path.abspath(__file__)))
     print(colored(p, 'red'))
@@ -44,11 +68,10 @@ def main():
     model = get_model(p)
     print(model)
     model = model.cuda()
-    
+
     # Freeze all layers except final 1 by 1 convolutional layer
-    for name, param in model.named_parameters():
-        if name not in ['decoder.4.weight', 'decoder.4.bias']:
-            param.requires_grad = False
+    for param in model.backbone.parameters():
+        param.requires_grad = False
 
     # Get criterion
     print(colored('Get loss', 'blue'))
@@ -137,5 +160,8 @@ def main():
     save_results_to_disk(p, val_dataloader, model, crf_postprocess=args.crf_postprocess)
     eval_stats = eval_segmentation_supervised_offline(p, true_val_dataset, verbose=True)
 
+
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser('LC', parents=[get_args_parser()])
+    args = parser.parse_args()
+    main(args)

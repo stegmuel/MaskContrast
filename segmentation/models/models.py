@@ -10,6 +10,8 @@ from torch.nn import functional as F
     SimpleSegmentationModel
     A simple encoder-decoder based segmentation model. 
 """
+
+
 class SimpleSegmentationModel(nn.Module):
     def __init__(self, backbone, decoder):
         super(SimpleSegmentationModel, self).__init__()
@@ -22,6 +24,7 @@ class SimpleSegmentationModel(nn.Module):
         x = self.decoder(x)
         x = F.interpolate(x, size=input_shape, mode='bilinear', align_corners=False)
         return x
+
 
 class ContrastiveSegmentationModel(nn.Module):
     def __init__(self, backbone, decoder, head, upsample, use_classification_head=False, freeze_batchnorm='none'):

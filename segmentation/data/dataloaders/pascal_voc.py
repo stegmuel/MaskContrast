@@ -15,9 +15,9 @@ import torch.utils.data as data
 import torch
 from PIL import Image
 
-from data.util.mypath import Path
-from data.util.google_drive import download_file_from_google_drive
-from utils.utils import mkdir_if_missing
+from segmentation.data.util.mypath import Path
+from segmentation.data.util.google_drive import download_file_from_google_drive
+from segmentation.utils.utils import mkdir_if_missing
 
 
 class VOC12(data.Dataset):
@@ -33,7 +33,7 @@ class VOC12(data.Dataset):
                           'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
 
     def __init__(self, root=Path.db_root_dir('VOCSegmentation'),
-                 split='val', transform=None, download=True, ignore_classes=[]):
+                 split='val', transform=None, download=False, ignore_classes=[]):
         # Set paths
         self.root = root
         valid_splits = ['trainaug', 'train', 'val']
@@ -45,8 +45,9 @@ class VOC12(data.Dataset):
         else:
             _semseg_dir = os.path.join(self.root, 'SegmentationClass')
 
-        _image_dir = os.path.join(self.root, 'images')
+        # _image_dir = os.path.join(self.root, 'images')
 
+        _image_dir = os.path.join(self.root, 'JPEGImages')
 
         # Download
         if download:
@@ -57,7 +58,9 @@ class VOC12(data.Dataset):
 
         # Splits are pre-cut
         print("Initializing dataloader for PASCAL VOC12 {} set".format(''.join(self.split)))
-        split_file = os.path.join(self.root, 'sets', self.split + '.txt')
+        # split_file = os.path.join(self.root, 'sets', self.split + '.txt')
+        split_file = os.path.join(self.root, 'ImageSets/Segmentation', self.split + '.txt')
+        # /media/thomas/Samsung_T5/VOC12/VOCdevkit/VOC2012/ImageSets/Segmentation
         self.images = []
         self.semsegs = []
         
