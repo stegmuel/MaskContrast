@@ -44,7 +44,7 @@ def get_args_parser():
     parser.add_argument("--optimizer", default='adam', type=str)
     parser.add_argument("--lr", default=0.1, type=float)
     parser.add_argument("--freeze_batchnorm", default='all', type=str)
-    parser.add_argument('--crf-postprocess', action='store_true', help='Apply CRF post-processing during evaluation')
+    parser.add_argument('--crf_postprocess', default=False, help='Apply CRF post-processing during evaluation')
     return parser
 
 
