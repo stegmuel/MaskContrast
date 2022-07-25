@@ -15,9 +15,9 @@ import torch.utils.data as data
 import torch
 from PIL import Image
 
-from segmentation.data.util.mypath import Path
-from segmentation.data.util.google_drive import download_file_from_google_drive
-from segmentation.utils.utils import mkdir_if_missing
+from data.util.mypath import Path
+from data.util.google_drive import download_file_from_google_drive
+from utils.utils import mkdir_if_missing
 
 
 class VOC12(data.Dataset):

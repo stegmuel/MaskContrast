@@ -5,7 +5,7 @@
 import os
 import yaml
 from easydict import EasyDict
-from segmentation.utils.utils import mkdir_if_missing
+from utils.utils import mkdir_if_missing
 
 
 def load_config(config_file_exp):

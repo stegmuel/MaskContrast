@@ -18,7 +18,7 @@ from utils.evaluate_utils import eval_segmentation_supervised_online, save_resul
                                  eval_segmentation_supervised_offline
 from termcolor import colored
 from utils.logger import Logger
-from segmentation.utils.dino_utils import bool_flag
+from utils.dino_utils import bool_flag
 
 
 def get_args_parser():

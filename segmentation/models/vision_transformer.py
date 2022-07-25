@@ -21,7 +21,7 @@ from functools import partial
 import torch
 import torch.nn as nn
 
-from segmentation.utils.dino_utils import trunc_normal_
+from utils.dino_utils import trunc_normal_
 from einops import repeat, rearrange
 
 

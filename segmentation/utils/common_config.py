@@ -7,11 +7,11 @@ import numpy as np
 import torch
 import torchvision
 import torchvision.transforms as transforms
-import segmentation.data.dataloaders.custom_transforms as custom_tr
-from segmentation.utils.collate import collate_custom
-from segmentation.models import vision_transformer as vits
+import data.dataloaders.custom_transforms as custom_tr
+from utils.collate import collate_custom
+from models import vision_transformer as vits
 from einops.layers.torch import Rearrange
-from segmentation.utils import dino_utils
+from utils import dino_utils
 
 
 def load_pretrained_weights(p, model):
@@ -60,7 +60,7 @@ def get_model(p):
         raise ValueError('Invalid backbone {}'.format(p['backbone']))
 
     if p['dilated']:
-        from segmentation.models.resnet_dilated import ResnetDilated
+        from models.resnet_dilated import ResnetDilated
         backbone = ResnetDilated(backbone)
     
     # Get head
@@ -70,7 +70,7 @@ def get_model(p):
         else:
             nc = p['model_kwargs']['ndim']
 
-        from segmentation.models.deeplab import DeepLabHead
+        from models.deeplab import DeepLabHead
         head = DeepLabHead(backbone_channels, nc)
 
     elif p['head'] == 'dim_reduction':
@@ -89,13 +89,13 @@ def get_model(p):
 
     # Compose model from backbone and head
     if p['kmeans_eval']:
-        from segmentation.models.models import ContrastiveSegmentationModel
+        from models.models import ContrastiveSegmentationModel
         import torch.nn as nn
         model = ContrastiveSegmentationModel(backbone, head, p['model_kwargs']['head'], 
                                                     p['model_kwargs']['upsample'], 
                                                     p['model_kwargs']['use_classification_head'], p['freeze_layer'])
     else:
-        from segmentation.models.models import SimpleSegmentationModel
+        from models.models import SimpleSegmentationModel
         model = SimpleSegmentationModel(backbone, head)
     
         # Load pretrained weights
@@ -105,7 +105,7 @@ def get_model(p):
 
 def get_train_dataset(p, transform=None):
     if p['train_db_name'] == 'VOCSegmentation':
-        from segmentation.data.dataloaders.pascal_voc import VOC12
+        from data.dataloaders.pascal_voc import VOC12
         dataset = VOC12(root=p['data_path'], split=p['split'], transform=transform)
     else:
         raise ValueError('Invalid train dataset {}'.format(p['train_db_name']))
@@ -115,7 +115,7 @@ def get_train_dataset(p, transform=None):
 
 def get_val_dataset(p, transform=None):
     if p['val_db_name'] == 'VOCSegmentation':
-        from segmentation.data.dataloaders.pascal_voc import VOC12
+        from data.dataloaders.pascal_voc import VOC12
         dataset = VOC12(root=p['data_path'], split='val', transform=transform)
     else:
         raise ValueError('Invalid validation dataset {}'.format(p['val_db_name']))
