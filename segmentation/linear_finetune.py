@@ -41,14 +41,8 @@ def get_args_parser():
     parser.add_argument("--pretraining",
                         default='/home/thomas/Documents/phd/samno_paper/samno/output/dino_deitsmall16_pretrain_full_checkpoint.pth', type=str)
     parser.add_argument("--epochs", default=60, type=int)
-    parser.add_argument("--scheduler", default='step', type=str)
-    parser.add_argument("--lr_decay_rate", default=1e-3, type=float)
-    parser.add_argument("--lr_decay_epochs", default=25, type=int)
     parser.add_argument("--optimizer", default='adam', type=str)
     parser.add_argument("--lr", default=0.1, type=float)
-    parser.add_argument("--weight_decay", default=0.0001, type=float)
-    parser.add_argument("--momentum", default=0.9, type=float)
-    parser.add_argument("--nesterov", default=False, type=bool_flag)
     parser.add_argument("--freeze_batchnorm", default='all', type=str)
     parser.add_argument('--crf-postprocess', action='store_true', help='Apply CRF post-processing during evaluation')
     return parser
@@ -80,7 +74,7 @@ def main(args):
     print(criterion)
 
     # CUDNN
-    print(colored('Set CuDNN benchmark', 'blue')) 
+    print(colored('Set CuDNN benchmark', 'blue'))
     torch.backends.cudnn.benchmark = True
 
     # Optimizer
@@ -94,9 +88,9 @@ def main(args):
     print(colored('Retrieve dataset', 'blue'))
     train_transforms = get_train_transformations()
     val_transforms = get_val_transformations()
-    train_dataset = get_train_dataset(p, train_transforms) 
+    train_dataset = get_train_dataset(p, train_transforms)
     val_dataset = get_val_dataset(p, val_transforms)
-    true_val_dataset = get_val_dataset(p, None) # True validation dataset without reshape - For validation. 
+    true_val_dataset = get_val_dataset(p, None) # True validation dataset without reshape - For validation.
     train_dataloader = get_train_dataloader(p, train_dataset)
     val_dataloader = get_val_dataloader(p, val_dataset)
     print(colored('Train samples %d - Val samples %d' %(len(train_dataset), len(val_dataset)), 'yellow'))
@@ -121,7 +115,7 @@ def main(args):
 
     # Main loop
     print(colored('Starting main loop', 'blue'))
-    
+
     for epoch in range(start_epoch, p['epochs']):
         print(colored('Epoch %d/%d' %(epoch+1, p['epochs']), 'yellow'))
         print(colored('-'*10, 'yellow'))

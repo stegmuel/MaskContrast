@@ -59,10 +59,10 @@ def get_model(p):
     else:
         raise ValueError('Invalid backbone {}'.format(p['backbone']))
 
-    if p['dilated']:
+    if p['dilated'] and 'resnet' in p['backbone']:
         from models.resnet_dilated import ResnetDilated
         backbone = ResnetDilated(backbone)
-    
+
     # Get head
     if p['head'] == 'deeplab':
         if not p['kmeans_eval']:
@@ -158,7 +158,7 @@ def get_optimizer(p, parameters):
         optimizer = torch.optim.SGD(parameters, lr=p['lr'], weight_decay=p['weight_decay'], momentum=p['momentum'], nesterov=p['nesterov'])
 
     elif p['optimizer'] == 'adam':
-        optimizer = torch.optim.Adam(parameters, lr=p['lr'], weight_decay=p['weight_decay'])
+        optimizer = torch.optim.Adam(parameters, lr=p['lr'])
     
     else:
         raise ValueError('Invalid optimizer {}'.format(p['optimizer']))
