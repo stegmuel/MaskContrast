@@ -57,6 +57,7 @@ def get_args_parser():
 def main(args):
     p = vars(args)
     cv2.setNumThreads(1)
+
     # Retrieve config file
     p = update_config(p)
     sys.stdout = Logger(p['log_file'])
