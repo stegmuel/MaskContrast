@@ -42,9 +42,9 @@ def get_args_parser():
                         default='/home/thomas/Documents/phd/samno_paper/samno/output/dino_deitsmall16_pretrain_full_checkpoint.pth', type=str)
     parser.add_argument("--epochs", default=60, type=int)
     parser.add_argument("--scheduler", default='step', type=str)
-    parser.add_argument("--lr_decay_rate", default=0.1, type=float)
+    parser.add_argument("--lr_decay_rate", default=1e-3, type=float)
     parser.add_argument("--lr_decay_epochs", default=25, type=int)
-    parser.add_argument("--optimizer", default='sgd', type=str)
+    parser.add_argument("--optimizer", default='adam', type=str)
     parser.add_argument("--lr", default=0.1, type=float)
     parser.add_argument("--weight_decay", default=0.0001, type=float)
     parser.add_argument("--momentum", default=0.9, type=float)
@@ -66,7 +66,6 @@ def main(args):
     # Get model
     print(colored('Retrieve model', 'blue'))
     model = get_model(p)
-    print(model)
     model = model.cuda()
 
     # Freeze all layers except final 1 by 1 convolutional layer

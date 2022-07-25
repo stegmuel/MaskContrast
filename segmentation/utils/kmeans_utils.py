@@ -125,10 +125,11 @@ def save_embeddings_to_disk(p, val_loader, model, n_clusters=21, seed=1234):
     ptr = 0
 
     all_prototypes = torch.zeros((len(val_loader.sampler), 32)).cuda()
-    all_sals = torch.zeros((len(val_loader.sampler), 512, 512)).cuda()
+    all_sals = torch.zeros((len(val_loader.sampler), 448, 448)).cuda()
     names = []
     for i, batch in enumerate(val_loader):
         output, sal = model(batch['image'].cuda(non_blocking=True))
+        print(output.shape, sal.shape)
         meta = batch['meta']
 
         # compute prototypes
@@ -143,7 +144,7 @@ def save_embeddings_to_disk(p, val_loader, model, n_clusters=21, seed=1234):
         for name in meta['image']:
             names.append(name)
 
-        if ptr % 300 == 0:
+        if ptr % 1 == 0:
             print('Computing prototype {}'.format(ptr))
 
     # perform kmeans

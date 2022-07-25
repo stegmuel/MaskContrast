@@ -3,8 +3,8 @@
 # Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 
 import torch
-from utils.utils import AverageMeter, ProgressMeter
-from utils.utils import SemsegMeter
+from segmentation.utils.utils import AverageMeter, ProgressMeter
+from segmentation.utils.utils import SemsegMeter
 
 
 def train_segmentation_vanilla(p, train_loader, model, criterion, optimizer, epoch, freeze_batchnorm='none'):
@@ -46,7 +46,7 @@ def train_segmentation_vanilla(p, train_loader, model, criterion, optimizer, epo
         loss.backward()
         optimizer.step()
 
-        if i % 100 == 0:
+        if i % 50 == 0:
             progress.display(i)
 
     eval_results = semseg_meter.return_score(verbose = True)

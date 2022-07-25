@@ -158,7 +158,7 @@ def get_optimizer(p, parameters):
         optimizer = torch.optim.SGD(parameters, lr=p['lr'], weight_decay=p['weight_decay'], momentum=p['momentum'], nesterov=p['nesterov'])
 
     elif p['optimizer'] == 'adam':
-        optimizer = torch.optim.Adam(parameters, **p['optimizer_kwargs'])
+        optimizer = torch.optim.Adam(parameters, lr=p['lr'], weight_decay=p['weight_decay'])
     
     else:
         raise ValueError('Invalid optimizer {}'.format(p['optimizer']))
