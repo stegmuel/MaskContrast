@@ -127,8 +127,8 @@ def main(args):
         print(colored('-'*10, 'yellow'))
 
         # Adjust lr
-        lr = adjust_learning_rate(p, optimizer, epoch)
-        print('Adjusted learning rate to {:.5f}'.format(lr))
+        # lr = adjust_learning_rate(p, optimizer, epoch)
+        # print('Adjusted learning rate to {:.5f}'.format(lr))
 
         # Train 
         print('Train ...')
