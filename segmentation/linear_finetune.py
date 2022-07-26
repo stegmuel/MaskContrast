@@ -154,6 +154,14 @@ def main(args):
     save_results_to_disk(p, val_dataloader, model, crf_postprocess=args.crf_postprocess)
     eval_stats = eval_segmentation_supervised_offline(p, true_val_dataset, verbose=True)
 
+    # Write the full results
+    with open(os.path.join(p['output_dir'], 'full_results.txt'), 'w') as file:
+        file.write(json.dumps(eval_stats))
+
+    # Write only the mIoU
+    with open(os.path.join(p['output_dir'], 'mIoU_results.txt'), 'w') as file:
+        file.write(f"mIoU: {100 * eval_stats['mIoU']}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('LC', parents=[get_args_parser()])
