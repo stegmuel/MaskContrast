@@ -3,25 +3,18 @@
 # Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 
 import os
-import sys
-import errno
-import cv2
-import hashlib
-import glob
 import tarfile
 
+import cv2
 import numpy as np
 import torch.utils.data as data
-import torch
 from PIL import Image
-
-from data.util.mypath import Path
 from data.util.google_drive import download_file_from_google_drive
+from data.util.mypath import Path
 from utils.utils import mkdir_if_missing
 
 
 class VOC12(data.Dataset):
-    
     GOOGLE_DRIVE_ID = '1pxhY5vsLwXuz6UHZVUKhtb7EJdCg2kuH'
 
     FILE = 'PASCAL_VOC.tgz'
@@ -33,13 +26,13 @@ class VOC12(data.Dataset):
                           'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
 
     def __init__(self, root=Path.db_root_dir('VOCSegmentation'),
-                 split='val', transform=None, download=False, ignore_classes=[]):
+                 split='val', transform=None, download=False, ignore_classes=[], masks_upsample=448):
         # Set paths
         self.root = root
         valid_splits = ['trainaug', 'train', 'val']
-        assert(split in valid_splits)
+        assert (split in valid_splits)
         self.split = split
-         
+
         if split == 'trainaug':
             _semseg_dir = os.path.join(self.root, 'SegmentationClassAug')
         else:
@@ -54,6 +47,7 @@ class VOC12(data.Dataset):
             self._download()
 
         # Transform
+        self.masks_upsample = masks_upsample
         self.transform = transform
 
         # Splits are pre-cut
@@ -63,7 +57,7 @@ class VOC12(data.Dataset):
         # /media/thomas/Samsung_T5/VOC12/VOCdevkit/VOC2012/ImageSets/Segmentation
         self.images = []
         self.semsegs = []
-        
+
         with open(split_file, "r") as f:
             lines = f.read().splitlines()
 
@@ -99,11 +93,11 @@ class VOC12(data.Dataset):
         if _semseg.shape != _img.shape[:2]:
             _semseg = cv2.resize(_semseg, _img.shape[:2][::-1], interpolation=cv2.INTER_NEAREST)
         sample['semseg'] = _semseg
-	
+
         sample['meta'] = {'im_size': (_img.shape[0], _img.shape[1]),
                           'image_file': self.images[index],
                           'image': os.path.basename(self.semsegs[index]).split('.')[0]}
-            
+
         if self.transform is not None:
             sample = self.transform(sample)
 
@@ -128,7 +122,7 @@ class VOC12(data.Dataset):
         return list(reversed(img.size))
 
     def __str__(self):
-        return 'VOC12(split=' + str(self.split) + ')' 
+        return 'VOC12(split=' + str(self.split) + ')'
 
     def get_class_names(self):
         return self.VOC_CATEGORY_NAMES
@@ -158,6 +152,7 @@ class VOC12(data.Dataset):
 if __name__ == '__main__':
     """ For purpose of debugging """
     from matplotlib import pyplot as plt
+
     dataset = VOC12(split='train', transform=None)
 
     fig, axes = plt.subplots(2)

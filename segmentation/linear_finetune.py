@@ -35,6 +35,7 @@ def get_args_parser():
     parser.add_argument("--num_workers", default=4, type=int)
     parser.add_argument("--backbone", default='vit', type=str)
     parser.add_argument("--dilated", default=False, type=bool_flag)
+    parser.add_argument("--resnet_dilate", default=1, type=int)
     parser.add_argument("--head", default='linear', type=str)
     parser.add_argument("--arch", default='vit_small', type=str)
     parser.add_argument("--patch_size", default=16, type=int)
@@ -46,6 +47,9 @@ def get_args_parser():
     parser.add_argument("--lr", default=0.1, type=float)
     parser.add_argument("--freeze_batchnorm", default='all', type=str)
     parser.add_argument('--crf_postprocess', default=False, help='Apply CRF post-processing during evaluation')
+    # parser.add_argument('--upsample_size', default=320, help='Apply CRF post-processing during evaluation')
+    parser.add_argument('--embeddings_upsample', default=448, help='')
+    parser.add_argument('--masks_upsample', default=448, help='')
     return parser
 
 
@@ -128,7 +132,7 @@ def main(args):
         # Train 
         print('Train ...')
         eval_train = train_segmentation_vanilla(p, train_dataloader, model, criterion, optimizer, epoch,
-                                                    freeze_batchnorm=p['freeze_batchnorm'])
+                                                freeze_batchnorm=p['freeze_batchnorm'])
 
         # Evaluate online -> This will use batched eval where every image is resized to the same resolution.
         print('Evaluate ...')

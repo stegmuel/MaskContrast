@@ -70,6 +70,29 @@ class Solarization(object):
             return img
 
 
+def load_pretrained_weights_resnet(model, pretrained_weights):
+    if any(k in pretrained_weights for k in ['densecl', 'orl', 'byol']):
+        key = 'state_dict'
+        prefix = None
+    elif any(k in pretrained_weights for k in ['pixpro', 'soco']):
+        key = 'model'
+        prefix = 'module.encoder.'
+    elif 'resim' in pretrained_weights:
+        key = 'state_dict'
+        prefix = 'module.encoder_q.'
+    if os.path.isfile(pretrained_weights):
+        state_dict = torch.load(pretrained_weights, map_location="cpu")
+        state_dict = state_dict[key]
+
+        # remove `module.` prefix
+        if prefix is not None:
+            state_dict = {k.replace(prefix, ""): v for k, v in state_dict.items()}
+        msg = model.load_state_dict(state_dict, strict=False)
+        print('Pretrained weights found at {} and loaded with msg: {}'.format(pretrained_weights, msg))
+    else:
+        print("There is no reference weights available for this model => We use random weights.")
+
+
 def load_pretrained_weights(model, pretrained_weights, checkpoint_key, model_name, patch_size):
     if os.path.isfile(pretrained_weights):
         state_dict = torch.load(pretrained_weights, map_location="cpu")

@@ -10,8 +10,7 @@ from utils.utils import SemsegMeter
 def train_segmentation_vanilla(p, train_loader, model, criterion, optimizer, epoch, freeze_batchnorm='none'):
     """ Train a segmentation model in a fully-supervised manner """
     losses = AverageMeter('Loss', ':.4e')
-    semseg_meter = SemsegMeter(p['num_classes'], train_loader.dataset.get_class_names(),
-                            p['has_bg'], ignore_index=255)
+    semseg_meter = SemsegMeter(p['num_classes'], train_loader.dataset.get_class_names(), p['has_bg'], ignore_index=255)
     progress = ProgressMeter(len(train_loader),
         [losses],
         prefix="Epoch: [{}]".format(epoch))

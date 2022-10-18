@@ -41,8 +41,9 @@ def eval_segmentation_supervised_online(p, val_loader, model, verbose=True):
 
 
 def eval_segmentation_supervised_offline(p, val_dataset, verbose=True):
-    """ Evaluate stored predictions from a segmentation network.
-        The semantic masks from the validation dataset are not supposed to change. 
+    """
+    Evaluate stored predictions from a segmentation network.
+    The semantic masks from the validation dataset are not supposed to change.
     """
     n_classes = p['num_classes'] + int(p['has_bg'])
 
@@ -63,7 +64,7 @@ def eval_segmentation_supervised_offline(p, val_dataset, verbose=True):
         valid = (gt != 255)
 
         if mask.shape != gt.shape:
-            warning.warn('Prediction and ground truth have different size. Resizing Prediction ..')
+            print('Prediction and ground truth have different size. Resizing Prediction ..')
             mask = cv2.resize(mask, gt.shape[::-1], interpolation=cv2.INTER_NEAREST)
 
         # TP, FP, and FN evaluation

@@ -13,16 +13,19 @@ from torch.nn import functional as F
 
 
 class SimpleSegmentationModel(nn.Module):
-    def __init__(self, backbone, decoder):
+    def __init__(self, backbone, decoder, upsample_size=448):
         super(SimpleSegmentationModel, self).__init__()
         self.backbone = backbone
         self.decoder = decoder
+        self.upsample_size = upsample_size
 
     def forward(self, x):
         input_shape = x.shape[-2:]
         x = self.backbone(x)
         x = self.decoder(x)
-        x = F.interpolate(x, size=input_shape, mode='bilinear', align_corners=False)
+        if self.upsample_size is not None:
+            # x = F.interpolate(x, size=input_shape, mode='bilinear', align_corners=False)
+            x = F.interpolate(x, size=self.upsample_size, mode='bilinear', align_corners=False)
         return x
 
 

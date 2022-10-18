@@ -39,6 +39,16 @@ def update_config(config):
         cfg['num_classes'] = 20
         cfg['has_bg'] = True
 
+    elif 'coco' in cfg['train_db_name']:
+        # TODO: check if has_bg is correct
+        mask_type = cfg['train_db_name'].split("_")[-1]
+        assert mask_type in ["thing", "stuff"]
+        if mask_type == "thing":
+            cfg['num_classes'] = 12
+            cfg['has_bg'] = True
+        else:
+            cfg['num_classes'] = 15
+            cfg['has_bg'] = True
     else:
         raise ValueError('Invalid train db name {}'.format(cfg['train_db_name']))
 
