@@ -1,7 +1,7 @@
 #
 # Authors: Wouter Van Gansbeke & Simon Vandenhende
 # Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
-
+import torch
 from torch import nn
 from torch.nn import functional as F
 
@@ -13,15 +13,24 @@ from torch.nn import functional as F
 
 
 class SimpleSegmentationModel(nn.Module):
-    def __init__(self, backbone, decoder, upsample_size=448):
+    def __init__(self, p, backbone, decoder, upsample_size=448):
         super(SimpleSegmentationModel, self).__init__()
         self.backbone = backbone
         self.decoder = decoder
         self.upsample_size = upsample_size
+        self.arch = p['arch']
+        self.n_last_blocks = p['n_last_blocks']
 
     def forward(self, x):
         input_shape = x.shape[-2:]
-        x = self.backbone(x)
+        if "vit" in self.arch:
+            intermediate_output = self.backbone.get_intermediate_layers(x, self.n_last_blocks)
+            x = torch.cat([x[:, 1:] for x in intermediate_output], dim=-1)
+            # if args.avgpool_patchtokens:
+            #     feats = torch.cat((feats, torch.mean(intermediate_output[-1][:, 1:], dim=1)), dim=-1)
+            # feats = feats.reshape(feats.shape[0], -1)
+        else:
+            x = self.backbone(x)
         x = self.decoder(x)
         if self.upsample_size is not None:
             # x = F.interpolate(x, size=input_shape, mode='bilinear', align_corners=False)

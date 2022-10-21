@@ -50,6 +50,7 @@ def get_args_parser():
     # parser.add_argument('--upsample_size', default=320, help='Apply CRF post-processing during evaluation')
     parser.add_argument('--embeddings_upsample', default=448, help='')
     parser.add_argument('--masks_upsample', default=448, help='')
+    parser.add_argument("--n_last_blocks", default=2, type=int)
     return parser
 
 

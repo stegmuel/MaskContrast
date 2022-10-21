@@ -81,7 +81,7 @@ def get_model(p):
         backbone = ResNet50Bottom(backbone)
     elif 'vit' in p['backbone']:
         backbone = vits.__dict__[p['arch']](patch_size=p['patch_size'])
-        backbone_channels = backbone.embed_dim
+        backbone_channels = p['n_last_blocks'] * backbone.embed_dim
         # Load pre-trained weights
         dino_utils.load_pretrained_weights(backbone, p['pretraining'], p['checkpoint_key'], p['arch'], p['patch_size'])
     else:
@@ -134,7 +134,7 @@ def get_model(p):
                                              p['model_kwargs']['use_classification_head'], p['freeze_layer'])
     else:
         from models.models import SimpleSegmentationModel
-        model = SimpleSegmentationModel(backbone, head, p['embeddings_upsample'])
+        model = SimpleSegmentationModel(p, backbone, head, p['embeddings_upsample'])
 
         # Load pretrained weights
         # load_pretrained_weights(p, model)
