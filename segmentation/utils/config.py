@@ -45,10 +45,10 @@ def update_config(config):
         assert mask_type in ["thing", "stuff"]
         if mask_type == "thing":
             cfg['num_classes'] = 12
-            cfg['has_bg'] = True
+            cfg['has_bg'] = False
         else:
             cfg['num_classes'] = 15
-            cfg['has_bg'] = True
+            cfg['has_bg'] = False
     else:
         raise ValueError('Invalid train db name {}'.format(cfg['train_db_name']))
 
