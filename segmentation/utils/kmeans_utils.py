@@ -14,6 +14,8 @@ from sklearn.decomposition import PCA
 from termcolor import colored
 from joblib import Parallel, delayed
 from sklearn import metrics
+from einops import rearrange
+from utils.leopart_utils import normalize_and_transform, cluster
 
 N_JOBS = 16 # set to number of threads
 
@@ -118,52 +120,37 @@ def eval_kmeans(p, val_dataset, n_clusters=21, compute_metrics=False, verbose=Tr
 
 
 @torch.no_grad()
-def save_embeddings_to_disk(p, val_loader, model, n_clusters=21, seed=1234):
-    import torch.nn as nn
+def save_embeddings_to_disk(p, val_loader, model, n_clusters=21, seed=1234, pca_dim=32):
     print('Save embeddings to disk ...')
     model.eval()
-    ptr = 0
 
-    all_prototypes = torch.zeros((len(val_loader.sampler), 32)).cuda()
-    all_sals = torch.zeros((len(val_loader.sampler), 448, 448)).cuda()
+    all_prototypes = []
     names = []
     for i, batch in enumerate(val_loader):
-        output, sal = model(batch['image'].cuda(non_blocking=True))
-        print(output.shape, sal.shape)
+        output = model(batch['image'].cuda(non_blocking=True)).cpu()
         meta = batch['meta']
 
-        # compute prototypes
-        bs, dim, _, _ = output.shape
-        output = output.reshape(bs, dim, -1) # B x dim x H.W
-        sal_proto = sal.reshape(bs, -1, 1).type(output.dtype) # B x H.W x 1
-        prototypes = torch.bmm(output, sal_proto*(sal_proto>0.5).float()).squeeze() # B x dim
-        prototypes = nn.functional.normalize(prototypes, dim=1)        
-        all_prototypes[ptr: ptr + bs] = prototypes
-        all_sals[ptr: ptr + bs, :, :] = (sal > 0.5).float()
-        ptr += bs
+        output = rearrange(output, 'b d h w -> (b h w) d')
+        all_prototypes.append(output)
         for name in meta['image']:
             names.append(name)
 
-        if ptr % 1 == 0:
-            print('Computing prototype {}'.format(ptr))
+        if i % 10 == 0:
+            print(f"Computing prototype {i}/{len(val_loader)}")
 
     # perform kmeans
-    all_prototypes = all_prototypes.cpu().numpy()
-    all_sals = all_sals.cpu().numpy()
-    n_clusters = n_clusters - 1
+    all_prototypes = torch.cat(all_prototypes)
     print('Kmeans clustering to {} clusters'.format(n_clusters))
     
     print(colored('Starting kmeans with scikit', 'green'))
-    pca = PCA(n_components = 32, whiten = True)
-    all_prototypes = pca.fit_transform(all_prototypes)
-    kmeans = MiniBatchKMeans(n_clusters=n_clusters, batch_size=1000, random_state=seed)
-    prediction_kmeans = kmeans.fit_predict(all_prototypes)
+    all_prototypes = normalize_and_transform(all_prototypes, pca_dim=pca_dim)
+    prediction_kmeans = cluster(pca_dim, all_prototypes.numpy(), 28, n_clusters, seed=seed)
 
     # save predictions
     for i, fname, pred in zip(range(len(val_loader.sampler)), names, prediction_kmeans):
-        prediction = all_sals[i].copy()
-        prediction[prediction == 1] = pred + 1
-        np.save(os.path.join(p['embedding_dir'], fname + '.npy'), prediction)
+        # prediction = all_sals[i].copy()
+        # prediction[prediction == 1] = pred + 1
+        np.save(os.path.join(p['embedding_dir'], fname + '.npy'), pred)
         if i % 300 == 0:
             print('Saving results: {} of {} objects'.format(i, len(val_loader.dataset)))
 
@@ -182,8 +169,8 @@ def _hungarian_match(flat_preds, flat_targets, preds_k, targets_k, metric='acc')
     res = []
     for out_c, gt_c in match:
         res.append((out_c, gt_c))
-
     return res
+
 
 def _majority_vote(flat_preds, flat_targets, preds_k, targets_k):
     iou_mat = Parallel(n_jobs=N_JOBS, backend='multiprocessing')(delayed(get_iou)(flat_preds, flat_targets, c1, c2) for c2 in range(targets_k) for c1 in range(preds_k))
