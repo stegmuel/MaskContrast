@@ -45,7 +45,7 @@ def train_segmentation_vanilla(p, train_loader, model, criterion, optimizer, epo
         loss.backward()
         optimizer.step()
 
-        if i % 50 == 0:
+        if i % 10 == 0:
             progress.display(i)
 
     eval_results = semseg_meter.return_score(verbose = True)

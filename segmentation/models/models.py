@@ -26,9 +26,6 @@ class SimpleSegmentationModel(nn.Module):
         if "vit" in self.arch:
             intermediate_output = self.backbone.get_intermediate_layers(x, self.n_last_blocks)
             x = torch.cat([x[:, 1:] for x in intermediate_output], dim=-1)
-            # if args.avgpool_patchtokens:
-            #     feats = torch.cat((feats, torch.mean(intermediate_output[-1][:, 1:], dim=1)), dim=-1)
-            # feats = feats.reshape(feats.shape[0], -1)
         else:
             x = self.backbone(x)
         x = self.decoder(x)

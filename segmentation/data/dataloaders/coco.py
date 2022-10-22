@@ -35,18 +35,18 @@ class COCOSegmentation(VisionDataset):
 
         # Set mask folder depending on mask_type
         if mask_type == "thing":
-            # seg_folder = "annotations/panoptic_annotations/semantic_segmentation_{}2017/"
+            seg_folder = "annotations/panoptic_annotations_trainval2017/semantic_segmentation_{}2017/"
             # seg_folder = "annotations/panoptic_annotations_trainval2017/annotations/panoptic_{}2017"
-            seg_folder = "/home/thomas/Downloads/{}2017"
-            json_file = "annotations/panoptic_annotations_trainval2017/annotations/panoptic_train2017.json"
+            # seg_folder = "/home/thomas/Downloads/{}2017"
+            json_file = "annotations/panoptic_annotations_trainval2017/annotations/panoptic_{}2017.json"
         elif mask_type == "stuff":
             # seg_folder = "annotations/stuff_annotations_trainval2017/annotations/"
             seg_folder = "annotations/stuff_annotations_trainval2017/annotations/stuff_{}2017_pixelmaps/"
-            json_file = "annotations/stuff_annotations_trainval2017/annotations/stuff_val2017.json"
+            json_file = "annotations/stuff_annotations_trainval2017/annotations/stuff_{}2017.json"
         else:
             raise ValueError(f"No support for image set {self.image_set}")
         seg_folder = seg_folder.format(image_set)
-        # json_file = json_file.format(image_set)
+        json_file = json_file.format(image_set)
 
         # Load categories to category to id map for merging to coarse categories
         with open(os.path.join(root, json_file)) as f:
