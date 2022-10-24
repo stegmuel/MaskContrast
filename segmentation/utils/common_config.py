@@ -119,9 +119,10 @@ def get_model(p):
             )
     elif p['head'] == 'identity':
         import torch.nn as nn
-        head = nn.Sequential(
-            Rearrange(pattern='b (h w) d -> b d h w', h=28, w=28),
-        )
+        if 'vit' in p['backbone']:
+            head = nn.Sequential(Rearrange(pattern='b (h w) d -> b d h w', h=28, w=28),)
+        else:
+            head = nn.Identity()
     else:
         raise ValueError('Invalid head {}'.format(p['head']))
 
