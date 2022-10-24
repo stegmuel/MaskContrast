@@ -42,24 +42,12 @@ def get_args_parser():
     parser.add_argument("--backbone", default='vit', type=str)
     parser.add_argument("--dilated", default=True, type=bool_flag)
     parser.add_argument("--pretrained", default=False, type=bool_flag)
-    # parser.add_argument("--upsample", default=False, type=bool_flag)
-    # parser.add_argument("--use_classificaton_head", default=True, type=bool_flag)
     parser.add_argument("--head", default='identity', type=str)
     parser.add_argument("--arch", default='vit_small', type=str)
     parser.add_argument("--patch_size", default=16, type=int)
     parser.add_argument("--checkpoint_key", default='teacher', type=str)
-    parser.add_argument("--pretraining",
-                        default='/home/thomas/Downloads/temp/multi_head_008/checkpoint0300.pth', type=str)
-    # parser.add_argument("--epochs", default=60, type=int)
-    # parser.add_argument("--scheduler", default='step', type=str)
-    # parser.add_argument("--lr_decay_rate", default=0.1, type=float)
-    # parser.add_argument("--lr_decay_epochs", default=25, type=int)
-    # parser.add_argument("--optimizer", default='sgd', type=str)
-    # parser.add_argument("--lr", default=0.1, type=float)
-    # parser.add_argument("--weight_decay", default=0.0001, type=float)
-
-    # parser.add_argument("--momentum", default=0.9, type=float)
-    # parser.add_argument("--nesterov", default=False, type=bool_flag)
+    parser.add_argument("--pretraining", default='/home/thomas/Downloads/temp/multi_head_008/checkpoint0300.pth',
+                        type=str)
     parser.add_argument("--freeze_batchnorm", default='all', type=str)
     parser.add_argument('--crf-postprocess', action='store_true', help='Apply CRF post-processing during evaluation')
     parser.add_argument('--num_seeds', default=5, type=int, help='number of seeds during kmeans')
@@ -113,8 +101,16 @@ def main(args):
         save_embeddings_to_disk(p, val_dataloader, model, n_clusters=n_clusters, seed=1234 + i, pca_dim=args.pca_dim)
         eval_stats = eval_kmeans(p, true_val_dataset, n_clusters=n_clusters, verbose=True)
         results_miou.append(eval_stats['mIoU'])
+
+        # Write results
+        with open(os.path.join(p['output_dir'], f'{i}_mIoU_results.txt'), 'w') as file:
+            file.write(f"mIoU: {eval_stats['mIoU'] * 100}")
     print(colored('Average mIoU is %2.1f' %(np.mean(results_miou)*100), 'green'))
-    
+
+    # Write only the mIoU
+    with open(os.path.join(p['output_dir'], 'average_mIoU_results.txt'), 'w') as file:
+        file.write(f"mIoU: {np.mean(results_miou) * 100}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('OC', parents=[get_args_parser()])
