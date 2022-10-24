@@ -106,7 +106,8 @@ def main(args):
     print(colored('Val samples %d' %(len(true_val_dataset)), 'yellow'))
 
     # Kmeans Clustering
-    n_clusters = p['n_clusters']
+    # n_clusters = p['n_clusters']
+    n_clusters = p['num_classes'] + int(p['has_bg'])
     results_miou = []
     for i in range(args.num_seeds):
         save_embeddings_to_disk(p, val_dataloader, model, n_clusters=n_clusters, seed=1234 + i, pca_dim=args.pca_dim)
