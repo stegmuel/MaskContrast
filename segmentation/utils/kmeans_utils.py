@@ -17,7 +17,7 @@ from sklearn import metrics
 from einops import rearrange
 from utils.leopart_utils import normalize_and_transform, cluster
 
-N_JOBS = 16 # set to number of threads
+N_JOBS = 1 # set to number of threads
 
 
 def eval_kmeans(p, val_dataset, n_clusters=21, compute_metrics=False, verbose=True):
