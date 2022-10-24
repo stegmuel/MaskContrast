@@ -161,7 +161,8 @@ def _hungarian_match(flat_preds, flat_targets, preds_k, targets_k, metric='acc')
 
     # perform hungarian matching
     print('Using iou as metric')
-    results = Parallel(n_jobs=N_JOBS, backend='multiprocessing')(delayed(get_iou)(flat_preds, flat_targets, c1, c2) for c2 in range(num_k) for c1 in range(num_k))
+    # results = Parallel(n_jobs=N_JOBS, backend='multiprocessing')(delayed(get_iou)(flat_preds, flat_targets, c1, c2) for c2 in range(num_k) for c1 in range(num_k))
+    results = [get_iou(flat_preds, flat_targets, c1, c2) for c2 in range(num_k) for c1 in range(num_k)]
     results = np.array(results)
     results = results.reshape((num_k, num_k)).T
     match = linear_sum_assignment(flat_targets.shape[0] - results)
@@ -173,7 +174,8 @@ def _hungarian_match(flat_preds, flat_targets, preds_k, targets_k, metric='acc')
 
 
 def _majority_vote(flat_preds, flat_targets, preds_k, targets_k):
-    iou_mat = Parallel(n_jobs=N_JOBS, backend='multiprocessing')(delayed(get_iou)(flat_preds, flat_targets, c1, c2) for c2 in range(targets_k) for c1 in range(preds_k))
+    # iou_mat = Parallel(n_jobs=N_JOBS, backend='multiprocessing')(delayed(get_iou)(flat_preds, flat_targets, c1, c2) for c2 in range(targets_k) for c1 in range(preds_k))
+    iou_mat = [get_iou(flat_preds, flat_targets, c1, c2) for c2 in range(targets_k) for c1 in range(preds_k)]
     iou_mat = np.array(iou_mat)
     results = iou_mat.reshape((targets_k, preds_k)).T
     results = np.argmax(results, axis=1)
