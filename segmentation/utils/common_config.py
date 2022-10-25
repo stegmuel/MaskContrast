@@ -157,9 +157,9 @@ def get_train_dataset(p, transform=None):
         # random.shuffle(file_list_val)
 
         # sample 10% of train images
-        random.shuffle(file_list)
-        file_list = file_list[:int(len(file_list) * 0.1)]
-        print(f"sampled {len(file_list)} COCO images for training")
+        # random.shuffle(file_list)
+        # file_list = file_list[:int(len(file_list) * 0.1)]
+        # print(f"sampled {len(file_list)} COCO images for training")
 
         dataset = COCOSegmentation(
             root=p['data_path'],
