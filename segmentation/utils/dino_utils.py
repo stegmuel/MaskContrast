@@ -72,9 +72,10 @@ class Solarization(object):
 
 
 def load_pretrained_weights_resnet(model, pretrained_weights):
+    key = None
+    prefix = None
     if any(k in pretrained_weights for k in ['densecl', 'orl', 'byol']):
         key = 'state_dict'
-        prefix = None
     elif any(k in pretrained_weights for k in ['pixpro', 'soco']):
         key = 'model'
         prefix = 'module.encoder.'
@@ -83,7 +84,8 @@ def load_pretrained_weights_resnet(model, pretrained_weights):
         prefix = 'module.encoder_q.'
     if os.path.isfile(pretrained_weights):
         state_dict = torch.load(pretrained_weights, map_location="cpu")
-        state_dict = state_dict[key]
+        if key is not None:
+            state_dict = state_dict[key]
 
         # remove `module.` prefix
         if prefix is not None:
