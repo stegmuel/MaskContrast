@@ -12,6 +12,7 @@ import torch
 import torchvision.transforms as transforms
 from einops.layers.torch import Rearrange
 from models import vision_transformer as vits
+from models import swin_transformer as swins
 from utils.collate import collate_custom
 
 from utils import dino_utils
@@ -84,6 +85,14 @@ def get_model(p):
         backbone_channels = p['n_last_blocks'] * backbone.embed_dim
         # Load pre-trained weights
         dino_utils.load_pretrained_weights(backbone, p['pretraining'], p['checkpoint_key'], p['arch'], p['patch_size'])
+    elif 'swin' in p['backbone']:
+        backbone = swins.__dict__[p['arch']](img_size=224)
+        embed_dim = backbone.embed_dim
+        num_layers = backbone.num_layers
+        backbone_channels = sum([embed_dim * 2 ** (num_layers - l - 1) for l in range(p['n_last_blocks'])])
+        # Load pre-trained weights
+        dino_utils.load_pretrained_weights(backbone, p['pretraining'], p['checkpoint_key'], p['arch'], p['patch_size'])
+
     else:
         raise ValueError('Invalid backbone {}'.format(p['backbone']))
 
@@ -113,6 +122,11 @@ def get_model(p):
                 Rearrange(pattern='b (h w) d -> b d h w', h=28, w=28),
                 nn.Conv2d(backbone_channels, nc, 1)
             )
+        elif 'swin' in p['backbone']:
+            head = nn.Sequential(
+                # Rearrange(pattern='b (h w) d -> b d h w', h=28, w=28),
+                nn.Conv2d(backbone_channels, nc, 1)
+            )
         else:
             head = nn.Sequential(
                 nn.Conv2d(backbone_channels, nc, 1)
@@ -121,6 +135,8 @@ def get_model(p):
         import torch.nn as nn
         if 'vit' in p['backbone']:
             head = nn.Sequential(Rearrange(pattern='b (h w) d -> b d h w', h=28, w=28),)
+        elif 'swin' in p['backbone']:
+            head = nn.Sequential(Rearrange(pattern='b (h w) d -> b d h w', h=14, w=14),)
         else:
             head = nn.Identity()
     else:

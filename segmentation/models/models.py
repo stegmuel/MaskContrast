@@ -4,7 +4,8 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
-
+from einops import rearrange
+import math
 
 """
     SimpleSegmentationModel
@@ -26,6 +27,18 @@ class SimpleSegmentationModel(nn.Module):
         if "vit" in self.arch:
             intermediate_output = self.backbone.get_intermediate_layers(x, self.n_last_blocks)
             x = torch.cat([x[:, 1:] for x in intermediate_output], dim=-1)
+        elif "swin" in self.arch:
+            intermediate_output = self.backbone.forward_return_n_last_stages(x, self.n_last_blocks)
+
+            x = []
+            for i_o in intermediate_output:
+                n = i_o.shape[1]
+                h_w = int(math.sqrt(n))
+                assert h_w ** 2 == n
+                i_o = rearrange(i_o, 'b (h w) d -> b d h w', h=h_w, w=h_w)
+                i_o = F.interpolate(i_o, size=28, mode='bilinear', align_corners=False)
+                x.append(i_o)
+            x = torch.cat(x, dim=1)
         else:
             x = self.backbone(x)
         x = self.decoder(x)
