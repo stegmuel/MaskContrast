@@ -8,33 +8,16 @@ class MySwinTransformer(SwinTransformer):
         super(MySwinTransformer, self).__init__(patch_size, embed_dim, depths, num_heads, window_size, **kwargs)
         # Cancel the prediction head
         self.embed_dim = embed_dim
+        self.depths = depths
         self.num_layers = len(depths)
         self.head = torch.nn.Identity()
         self.num_features = embed_dim * 2 ** (len(depths) - 1)
 
     def forward_return_n_last_stages(self, x, n=1):
-        n_stages = len(self.depths)
-        start_stage = n_stages - n
-
-        x = self.patch_embed(x)
-        if self.ape:
-            x = x + self.absolute_pos_embed
-        x = self.pos_drop(x)
-
-        # note: there is no [CLS] token in Swin Transformer
-        output = []
-        for i, layer in enumerate(self.layers):
-            x, fea = layer.forward_with_features(x)
-
-            if i >= start_stage:
-                x_ = fea[-1]
-
-                if i == len(self.layers) - 1: # use the norm in the last stage
-                    x_ = self.norm(x_)
-
-                # Store
-                output.append(x_)
-        return output
+        x = self.features(x)
+        x = self.norm(x)
+        x = x.permute(0, 3, 1, 2)
+        return [x]
 
     def forward(self, x):
         x = self.features(x)

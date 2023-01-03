@@ -32,10 +32,6 @@ class SimpleSegmentationModel(nn.Module):
 
             x = []
             for i_o in intermediate_output:
-                n = i_o.shape[1]
-                h_w = int(math.sqrt(n))
-                assert h_w ** 2 == n
-                i_o = rearrange(i_o, 'b (h w) d -> b d h w', h=h_w, w=h_w)
                 i_o = F.interpolate(i_o, size=28, mode='bilinear', align_corners=False)
                 x.append(i_o)
             x = torch.cat(x, dim=1)

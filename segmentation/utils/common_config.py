@@ -83,13 +83,15 @@ def get_model(p):
     elif 'vit' in p['backbone']:
         backbone = vits.__dict__[p['arch']](patch_size=p['patch_size'])
         backbone_channels = p['n_last_blocks'] * backbone.embed_dim
+
         # Load pre-trained weights
         dino_utils.load_pretrained_weights(backbone, p['pretraining'], p['checkpoint_key'], p['arch'], p['patch_size'])
     elif 'swin' in p['backbone']:
-        backbone = swins.__dict__[p['arch']]
+        backbone = swins.__dict__[p['arch']]()
         embed_dim = backbone.embed_dim
         num_layers = backbone.num_layers
         backbone_channels = sum([embed_dim * 2 ** (num_layers - l - 1) for l in range(p['n_last_blocks'])])
+
         # Load pre-trained weights
         dino_utils.load_pretrained_weights(backbone, p['pretraining'], p['checkpoint_key'], p['arch'], p['patch_size'])
 
