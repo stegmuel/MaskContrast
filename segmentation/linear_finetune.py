@@ -63,8 +63,8 @@ def untar_to_dst(untar_path, src):
         untar_path = os.environ[untar_path[1:]]
     start_copy_time = time.time()
 
-    if not os.path.exists(os.path.join(untar_path, "data")):
-        data_dir = os.path.join(untar_path, "data")
+    data_dir = os.path.join(untar_path, "data")
+    if not os.path.exists(data_dir):
         os.mkdir(data_dir)
     job_id = os.environ["SLURM_JOB_ID"]
     job_dir = os.path.join(data_dir, job_id)
