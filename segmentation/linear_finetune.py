@@ -20,6 +20,8 @@ from utils.evaluate_utils import eval_segmentation_supervised_online, save_resul
 from termcolor import colored
 from utils.logger import Logger
 from utils.dino_utils import bool_flag
+import time
+import tarfile
 
 
 def get_args_parser():
@@ -51,12 +53,41 @@ def get_args_parser():
     parser.add_argument('--embeddings_upsample', default=448, help='')
     parser.add_argument('--masks_upsample', default=448, help='')
     parser.add_argument("--n_last_blocks", default=2, type=int)
+    parser.add_argument("--untar_path", default="", type=str)
     return parser
+
+
+def untar_to_dst(untar_path, src):
+    assert (untar_path != "")
+
+    if untar_path[0] == '$':
+        untar_path = os.environ[untar_path[1:]]
+    start_copy_time = time.time()
+
+    with tarfile.open(src, 'r') as f:
+        f.extractall(untar_path)
+    print('Time taken for untar:', time.time() - start_copy_time)
+
+    torch.distributed.barrier()
+    time.sleep(5)
+    return untar_path
+
+
+dataset_dict = {
+    'VOCSegmentation': '/VOC12/VOCdevkit/VOC2012',
+    'coco_thing': 'coco',
+    'coco_stuff': 'coco'
+}
 
 
 def main(args):
     p = vars(args)
     cv2.setNumThreads(1)
+
+    # Untar if needed
+    if p['data_path'].endswith('tar'):
+        untar_path = untar_to_dst(p['untar_path'], p['data_path'])
+        p['data_path'] = os.path.join(untar_path, dataset_dict[p['train_db_name']])
 
     # Retrieve config file
     p = update_config(p)
