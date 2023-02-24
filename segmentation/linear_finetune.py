@@ -59,15 +59,21 @@ def get_args_parser():
 
 def untar_to_dst(untar_path, src):
     assert (untar_path != "")
-
     if untar_path[0] == '$':
         untar_path = os.environ[untar_path[1:]]
     start_copy_time = time.time()
 
+    if not os.path.exists(os.path.join(untar_path, "data")):
+        data_dir = os.path.join(untar_path, "data")
+        os.mkdir(data_dir)
+    job_id = os.environ["SLURM_JOB_ID"]
+    job_dir = os.path.join(data_dir, job_id)
+    os.mkdir(job_dir)
+
     with tarfile.open(src, 'r') as f:
-        f.extractall(untar_path)
+        f.extractall(job_dir)
     print('Time taken for untar:', time.time() - start_copy_time)
-    return untar_path
+    return job_dir
 
 
 dataset_dict = {
