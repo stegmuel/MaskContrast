@@ -67,14 +67,11 @@ def untar_to_dst(untar_path, src):
     with tarfile.open(src, 'r') as f:
         f.extractall(untar_path)
     print('Time taken for untar:', time.time() - start_copy_time)
-
-    torch.distributed.barrier()
-    time.sleep(5)
     return untar_path
 
 
 dataset_dict = {
-    'VOCSegmentation': '/VOC12/VOCdevkit/VOC2012',
+    'VOCSegmentation': 'VOC12/VOCdevkit/VOC2012',
     'coco_thing': 'coco',
     'coco_stuff': 'coco'
 }
