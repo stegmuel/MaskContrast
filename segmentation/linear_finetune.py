@@ -8,6 +8,7 @@ import os
 import sys
 import torch
 import json
+from pathlib import Path
 
 from utils.config import update_config
 from utils.common_config import get_train_dataset, get_train_transformations,\
@@ -63,12 +64,8 @@ def untar_to_dst(untar_path, src):
         untar_path = os.environ[untar_path[1:]]
     start_copy_time = time.time()
 
-    data_dir = os.path.join(untar_path, "data")
-    if not os.path.exists(data_dir):
-        os.mkdir(data_dir)
-    job_id = os.environ["SLURM_JOB_ID"]
-    job_dir = os.path.join(data_dir, job_id)
-    os.mkdir(job_dir)
+    job_dir = os.path.join(untar_path, "data", os.environ["SLURM_JOB_ID"])
+    Path(job_dir).mkdir(exist_ok=True, parents=True)
 
     with tarfile.open(src, 'r') as f:
         f.extractall(job_dir)
