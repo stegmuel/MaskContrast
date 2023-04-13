@@ -6,6 +6,8 @@ import torch
 import numpy as np
 import collections
 
+string_classes = str
+int_classes = (bool, int)
 
 def collate_custom(batch):
     if isinstance(batch[0], np.int64):
@@ -17,8 +19,14 @@ def collate_custom(batch):
     elif isinstance(batch[0], np.ndarray):
         return np.stack(batch, 0)
 
+    elif isinstance(batch[0], int_classes):
+        return torch.LongTensor(batch)
+
     elif isinstance(batch[0], float):
         return torch.FloatTensor(batch)
+
+    elif isinstance(batch[0], string_classes):
+        return batch
 
     elif isinstance(batch[0], collections.Mapping):
         batch_modified = {key: collate_custom([d[key] for d in batch]) for key in batch[0] if key.find('idx') < 0}
