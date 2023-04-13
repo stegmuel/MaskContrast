@@ -4,7 +4,6 @@
 
 import os
 import cv2
-import imageio
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -96,6 +95,8 @@ def eval_segmentation_supervised_offline(p, val_dataset, verbose=True):
 
 @torch.no_grad()
 def save_results_to_disk(p, val_loader, model, crf_postprocess=False):
+    return
+    import imageio
     print('Save results to disk ...')
     model.eval()
 
